@@ -2,12 +2,14 @@ import pygame
 
 from paddles import Paddle
 from ball import Ball
+from time import sleep
+from random import randrange
 
 BLACK = (0,0,0)
 WHITE = (255,255,255)
 
 class Pong():
-    def __init__(self, screen_size, twoPlayer):
+    def __init__(self, screen_size, twoPlayer=True):
         self.screen = pygame.display.set_mode(screen_size)
         
         # Ball Variables
@@ -28,6 +30,7 @@ class Pong():
         self.clock = pygame.time.Clock()
         self.playerScore = 0
         self.aiScore = 0
+        self.level = 1
         
         self.initializeGame()
         
@@ -64,18 +67,40 @@ class Pong():
         pygame.display.set_caption("PONG")
         
     def aiPlayer(self):
+        closest = self.ballList[0]
+        for ball in self.ballList:
+            if self.aiPaddle.rect.y - ball.rect.y <= 0:
+                 closest = ball
+        self.aiPaddle.rect.y = closest.rect.y
+        
+    def resetGameState(self):
+        self.playerPaddle.rect.x = 20
+        self.playerPaddle.rect.y = 200
+        
+        self.aiPaddle.rect.x = 670
+        self.aiPaddle.rect.y = 200
+        
+        for ball in self.ballList:
+            ball.rect.x = 345
+            ball.rect.y = randrange(155, 235)
         
 
     def startGame(self):  
+        nextLevel=False
         while self.gameOn:
-            nextLevel=False
             for event in pygame.event.get():
                 if event.type == pygame.QUIT: # If user clicked close
                     self.gameOn = False # Flag that we are done so we exit this loop
                 elif event.type==pygame.KEYDOWN:
                     if event.key==pygame.K_x: #Pressing the x Key will quit the game
                         self.gameOn=False
-        
+            if nextLevel:
+                self.resetGameState()
+                self.addBall(position=[345, randrange(155, 235)])
+                # ADD NEXT LEVEL TXT
+                self.level+=1
+                nextLevel = False
+                        
             #Moving the paddles when the user uses the arrow keys (player A) or "W/S" keys (player B) 
             keys = pygame.key.get_pressed()
             if keys[pygame.K_w]:
@@ -83,10 +108,13 @@ class Pong():
             if keys[pygame.K_s]:
                 self.playerPaddle.moveDown(5)
             
-            if keys[pygame.K_UP]:
-                self.aiPaddle.moveUp(5)
-            if keys[pygame.K_DOWN]:
-                self.aiPaddle.moveDown(5)    
+            if self.twoPlayer:
+                if keys[pygame.K_UP]:
+                    self.aiPaddle.moveUp(5)
+                if keys[pygame.K_DOWN]:
+                    self.aiPaddle.moveDown(5) 
+            else:
+                self.aiPlayer()   
         
             # --- Game logic should go here
             self.sprite_list.update()
@@ -126,5 +154,6 @@ class Pong():
             pygame.display.flip()
             
             self.clock.tick(60)
+            
         
         pygame.quit()
