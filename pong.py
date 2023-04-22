@@ -7,7 +7,7 @@ BLACK = (0,0,0)
 WHITE = (255,255,255)
 
 class Pong():
-    def __init__(self, screen_size):
+    def __init__(self, screen_size, twoPlayer):
         self.screen = pygame.display.set_mode(screen_size)
         
         # Ball Variables
@@ -21,11 +21,11 @@ class Pong():
         # Sprite list containing Balls, Paddle, and other sprites
         self.sprite_list = pygame.sprite.Group()
         
+        # Game Variables 
+        self.twoPlayer = twoPlayer
         self.gameOn = True
         self.nextLevel = False
-
         self.clock = pygame.time.Clock()
-
         self.playerScore = 0
         self.aiScore = 0
         
@@ -33,6 +33,7 @@ class Pong():
         
 
     def createPaddles(self, player_color=WHITE, ai_color=WHITE, x_size=10, y_size=100):
+        ''' Creates the player and ai paddles'''
         self.playerPaddle = Paddle(player_color, x_size, y_size)
         self.playerPaddle.rect.x = 20
         self.playerPaddle.rect.y = 200
@@ -61,9 +62,11 @@ class Pong():
         
     def setDisplays(self):
         pygame.display.set_caption("PONG")
-
-    def startGame(self):
         
+    def aiPlayer(self):
+        
+
+    def startGame(self):  
         while self.gameOn:
             nextLevel=False
             for event in pygame.event.get():
@@ -98,7 +101,6 @@ class Pong():
                 if ball.rect.x<=0:
                     # ball.rect.x=0
                     self.aiScore+=1
-
                     # ball.bounce()
                 if ball.rect.y>490:
                     ball.rect.y=490 
