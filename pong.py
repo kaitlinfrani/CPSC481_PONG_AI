@@ -10,12 +10,15 @@ class Pong():
     def __init__(self, screen_size):
         self.screen = pygame.display.set_mode(screen_size)
         
+        # Ball Variables
         self.ballList = []
         self.numBalls = 1
         
+        # Paddle Variables
         self.playerPaddle = Paddle(WHITE, 0, 0)
         self.aiPaddle = Paddle(WHITE, 0, 0)
         
+        # Sprite list containing Balls, Paddle, and other sprites
         self.sprite_list = pygame.sprite.Group()
         
         self.gameOn = True
@@ -90,12 +93,13 @@ class Pong():
                 if ball.rect.x>=690:
                     self.playerScore+=1
                     nextLevel = True
-                    ball.rect.x=690 
-                    ball.bounce()
+                    # ball.rect.x=690 
+                    # ball.bounce()
                 if ball.rect.x<=0:
-                    ball.rect.x=0
+                    # ball.rect.x=0
                     self.aiScore+=1
-                    ball.bounce()
+
+                    # ball.bounce()
                 if ball.rect.y>490:
                     ball.rect.y=490 
                     ball.bounce()
