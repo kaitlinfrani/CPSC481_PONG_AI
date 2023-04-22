@@ -3,82 +3,122 @@ import pygame
 from paddles import Paddle
 from ball import Ball
 
-pygame.init()
-
 BLACK = (0,0,0)
 WHITE = (255,255,255)
 
-screen_size = (700,500)
-screen = pygame.display.set_mode(screen_size)
-pygame.display.set_caption("PONG")
+class Pong():
+    def __init__(self, screen_size):
+        self.screen = pygame.display.set_mode(screen_size)
+        
+        self.ballList = []
+        self.numBalls = 1
+        
+        self.playerPaddle = Paddle(WHITE, 0, 0)
+        self.aiPaddle = Paddle(WHITE, 0, 0)
+        
+        self.sprite_list = pygame.sprite.Group()
+        
+        self.gameOn = True
+        self.nextLevel = False
 
+        self.clock = pygame.time.Clock()
 
-# Ball initlaization
-ball = Ball(WHITE,10,10)
-ball.rect.x = 345
-ball.rect.y = 195
+        self.playerScore = 0
+        self.aiScore = 0
+        
+        self.initializeGame()
+        
 
-# Paddle initalization
-playerPaddle = Paddle(WHITE, 10, 100)
-playerPaddle.rect.x = 20
-playerPaddle.rect.y = 200
+    def createPaddles(self, player_color=WHITE, ai_color=WHITE, x_size=10, y_size=100):
+        self.playerPaddle = Paddle(player_color, x_size, y_size)
+        self.playerPaddle.rect.x = 20
+        self.playerPaddle.rect.y = 200
 
-aiPaddle = Paddle(WHITE, 10, 100)
-aiPaddle.rect.x = 670
-aiPaddle.rect.y = 200
+        self.aiPaddle = Paddle(ai_color, x_size, y_size)
+        self.aiPaddle.rect.x = 670
+        self.aiPaddle.rect.y = 200
+        
+    def addBall(self, position, ball_color=WHITE, x_size=10, y_size=10):
+        ball = Ball(ball_color, x_size, y_size)
+        ball.rect.x = position[0]
+        ball.rect.y = position[1]
+        self.ballList.append(ball)
+        
+    def initializeGame(self):
+        self.setDisplays()
+                
+        self.createPaddles()
+        self.addBall(position=[345, 195])
+        
+        self.sprite_list.add(self.playerPaddle)
+        self.sprite_list.add(self.aiPaddle)
+        
+        for _ in self.ballList:
+            self.sprite_list.add(_)
+        
+    def setDisplays(self):
+        pygame.display.set_caption("PONG")
 
-sprite_list = pygame.sprite.Group()
+    def startGame(self):
+        
+        while self.gameOn:
+            nextLevel=False
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT: # If user clicked close
+                    self.gameOn = False # Flag that we are done so we exit this loop
+                elif event.type==pygame.KEYDOWN:
+                    if event.key==pygame.K_x: #Pressing the x Key will quit the game
+                        self.gameOn=False
+        
+            #Moving the paddles when the user uses the arrow keys (player A) or "W/S" keys (player B) 
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_w]:
+                self.playerPaddle.moveUp(5)
+            if keys[pygame.K_s]:
+                self.playerPaddle.moveDown(5)
+            
+            if keys[pygame.K_UP]:
+                self.aiPaddle.moveUp(5)
+            if keys[pygame.K_DOWN]:
+                self.aiPaddle.moveDown(5)    
+        
+            # --- Game logic should go here
+            self.sprite_list.update()
+            
+            for ball in self.ballList:
+            #Check if the ball is bouncing against any of the 4 walls:
+                if ball.rect.x>=690:
+                    self.playerScore+=1
+                    nextLevel = True
+                    ball.rect.x=690 
+                    ball.bounce()
+                if ball.rect.x<=0:
+                    ball.rect.x=0
+                    self.aiScore+=1
+                    ball.bounce()
+                if ball.rect.y>490:
+                    ball.rect.y=490 
+                    ball.bounce()
+                if ball.rect.y<0:
+                    ball.rect.y=0 
+                    ball.bounce()       
+                if pygame.sprite.collide_mask(ball, self.playerPaddle) or pygame.sprite.collide_mask(ball, self.aiPaddle):
+                    ball.bounce()
 
-sprite_list.add(playerPaddle)
-sprite_list.add(aiPaddle)
-sprite_list.add(ball)
-
-gameOn = True
-
-clock = pygame.time.Clock()
-
-
-while gameOn:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT: # If user clicked close
-            carryOn = False # Flag that we are done so we exit this loop
-        elif event.type==pygame.KEYDOWN:
-            if event.key==pygame.K_x: #Pressing the x Key will quit the game
-                carryOn=False
- 
-    #Moving the paddles when the user uses the arrow keys (player A) or "W/S" keys (player B) 
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_w]:
-        playerPaddle.moveUp(5)
-    if keys[pygame.K_s]:
-        playerPaddle.moveDown(5)
-    
-    if keys[pygame.K_UP]:
-        aiPaddle.moveUp(5)
-    if keys[pygame.K_DOWN]:
-        aiPaddle.moveDown(5)    
- 
-    # --- Game logic should go here
-    sprite_list.update()
-    
-    #Check if the ball is bouncing against any of the 4 walls:
-    if ball.rect.x>=690:
-        ball.velocity[0] = -ball.velocity[0]
-    if ball.rect.x<=0:
-        ball.velocity[0] = -ball.velocity[0]
-    if ball.rect.y>490:
-        ball.velocity[1] = -ball.velocity[1]
-    if ball.rect.y<0:
-        ball.velocity[1] = -ball.velocity[1] 
-    
-    screen.fill(BLACK)
-    
-    pygame.draw.line(screen, WHITE, [349, 0], [349, 500], 5)
- 
-    sprite_list.draw(screen)
-    
-    pygame.display.flip()
-     
-    clock.tick(60)
- 
-pygame.quit()
+                self.screen.fill(BLACK)
+                
+                pygame.draw.line(self.screen, WHITE, [349, 0], [349, 500], 5)
+            
+                self.sprite_list.draw(self.screen)
+            
+            font = pygame.font.Font(None, 74)
+            text = font.render(str(self.playerScore), 1, WHITE)
+            self.screen.blit(text, (250,10))
+            text = font.render(str(self.aiScore), 1, WHITE)
+            self.screen.blit(text, (420,10))
+            
+            pygame.display.flip()
+            
+            self.clock.tick(60)
+        
+        pygame.quit()
