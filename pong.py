@@ -83,6 +83,9 @@ class Pong():
         for ball in self.ballList:
             ball.rect.x = 345
             ball.rect.y = randrange(155, 235)
+            
+        for _ in self.ballList:
+            self.sprite_list.add(_)
         
 
     def startGame(self):  
@@ -97,6 +100,7 @@ class Pong():
             if nextLevel:
                 self.resetGameState()
                 self.addBall(position=[345, randrange(155, 235)])
+                print(self.ballList)
                 # ADD NEXT LEVEL TXT
                 self.level+=1
                 nextLevel = False
