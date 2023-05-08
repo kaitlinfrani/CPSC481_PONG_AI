@@ -9,7 +9,7 @@ BLACK = (0,0,0)
 WHITE = (255,255,255)
 
 class Pong():
-    def __init__(self, screen_size, twoPlayer=True):
+    def __init__(self, screen_size, twoPlayer=False):
         self.screen = pygame.display.set_mode(screen_size)
         
         # Ball Variables
@@ -133,6 +133,7 @@ class Pong():
                 if ball.rect.x<=0:
                     # ball.rect.x=0
                     self.aiScore+=1
+                    self.resetGameState()
                     # ball.bounce()
                 if ball.rect.y>490:
                     ball.rect.y=490 
@@ -159,5 +160,4 @@ class Pong():
             
             self.clock.tick(60)
             
-        
         pygame.quit()
