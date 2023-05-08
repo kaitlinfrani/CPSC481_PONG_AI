@@ -45,8 +45,8 @@ class Pong():
         self.aiPaddle.rect.x = 670
         self.aiPaddle.rect.y = 200
         
-    def addBall(self, position, ball_color=WHITE, x_size=10, y_size=10):
-        ball = Ball(ball_color, x_size, y_size)
+    def addBall(self, position, ball_color=WHITE, radius = 10):
+        ball = Ball(ball_color, radius)
         ball.rect.x = position[0]
         ball.rect.y = position[1]
         self.ballList.append(ball)
@@ -67,11 +67,18 @@ class Pong():
         pygame.display.set_caption("PONG")
         
     def aiPlayer(self):
-        closest = self.ballList[0]
-        for ball in self.ballList:
-            if self.aiPaddle.rect.y - ball.rect.y <= 0:
-                 closest = ball
-        self.aiPaddle.rect.y = closest.rect.y
+        follow = randrange(0,5)
+        if follow == True:
+            closest = self.ballList[0]
+            for ball in self.ballList:
+                if ball.rect.x > 250:
+                    if self.aiPaddle.rect.y - ball.rect.y <= 0:
+                        closest = ball
+            if self.aiPaddle.rect.y < closest.rect.y:
+                self.aiPaddle.rect.y += 5
+            else:
+                self.aiPaddle.rect.y -= 5
+            # self.aiPaddle.rect.y = closest.rect.y
         
     def resetGameState(self):
         self.playerPaddle.rect.x = 20
@@ -87,7 +94,40 @@ class Pong():
         for _ in self.ballList:
             self.sprite_list.add(_)
         
+        font = pygame.font.Font(None, 74)
+        
+        # text = font.render(str("SCORE"), 1, WHITE)
+        # self.screen.blit(text, (250,250))
+        
+        # sleep(0.5)
 
+        # pygame.display.flip()
+            
+        # self.clock.tick(60)
+        
+        
+        # text = font.render(str("3"), 1, WHITE)
+        # self.screen.blit(text, (250,250))
+        
+        # sleep(1)
+        
+        # pygame.display.flip()
+        # self.clock.tick(60)
+        
+        # text = font.render(str("2"), 1, WHITE)
+        # self.screen.blit(text, (250,250))
+            
+        # sleep(1)
+        
+        # pygame.display.flip()
+        # self.clock.tick(60)
+        
+        # text = font.render(str("1"), 1, WHITE)
+        # self.screen.blit(text, (250,250))
+            
+        # sleep(1)
+        
+        
     def startGame(self):  
         nextLevel=False
         while self.gameOn:
