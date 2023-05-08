@@ -45,7 +45,7 @@ class Pong():
         self.aiPaddle.rect.x = 670
         self.aiPaddle.rect.y = 200
         
-    def addBall(self, position, ball_color=WHITE, radius = 10):
+    def addBall(self, position, ball_color=WHITE, radius = 10):    
         ball = Ball(ball_color, radius)
         ball.rect.x = position[0]
         ball.rect.y = position[1]
@@ -67,25 +67,32 @@ class Pong():
         pygame.display.set_caption("PONG")
         
     def aiPlayer(self):
-        follow = randrange(0,5)
-        if follow == True:
-            closest = self.ballList[0]
-            for ball in self.ballList:
-                if ball.rect.x > 250:
+        follow = randrange(0,3)
+        
+        if 0 <= self.aiPaddle.rect.y <= 400:
+            if follow == 0:
+                closest = self.ballList[0]
+                for ball in self.ballList:
                     if self.aiPaddle.rect.y - ball.rect.y <= 0:
                         closest = ball
-            if self.aiPaddle.rect.y < closest.rect.y:
-                self.aiPaddle.rect.y += 5
-            else:
-                self.aiPaddle.rect.y -= 5
-            # self.aiPaddle.rect.y = closest.rect.y
+                if self.aiPaddle.rect.y < closest.rect.y:
+                    self.aiPaddle.rect.y += 5
+                else:
+                    self.aiPaddle.rect.y -= 5
+        elif self.aiPaddle.rect.y < 0 :
+            self.aiPaddle.rect.y = 0
+        elif self.aiPaddle.rect.y > 400:
+            self.aiPaddle.rect.y = 400
         
-    def resetGameState(self):
+    def resetGameState(self, scoreTime, nextLevel):
         self.playerPaddle.rect.x = 20
         self.playerPaddle.rect.y = 200
         
         self.aiPaddle.rect.x = 670
         self.aiPaddle.rect.y = 200
+        
+        if nextLevel:
+            self.addBall(position=[345, 195])
         
         for ball in self.ballList:
             ball.rect.x = 345
@@ -94,42 +101,33 @@ class Pong():
         for _ in self.ballList:
             self.sprite_list.add(_)
         
-        font = pygame.font.Font(None, 74)
+        self.countdown(scoreTime)
         
-        # text = font.render(str("SCORE"), 1, WHITE)
-        # self.screen.blit(text, (250,250))
         
-        # sleep(0.5)
-
-        # pygame.display.flip()
+    def countdown(self, scoreTime):
+        while True:
+            currentTime = pygame.time.get_ticks()
             
-        # self.clock.tick(60)
-        
-        
-        # text = font.render(str("3"), 1, WHITE)
-        # self.screen.blit(text, (250,250))
-        
-        # sleep(1)
-        
-        # pygame.display.flip()
-        # self.clock.tick(60)
-        
-        # text = font.render(str("2"), 1, WHITE)
-        # self.screen.blit(text, (250,250))
+            if currentTime - scoreTime < 700:
+                font = pygame.font.Font(None, 74)
+                text = font.render("3", False, WHITE)
+                self.screen.blit(text, (250,250))
             
-        # sleep(1)
+            if 700 < currentTime - scoreTime < 1400:
+                font = pygame.font.Font(None, 74)
+                text = font.render("2", False, WHITE)
+                self.screen.blit(text, (250,250))
+                
+            if 1400 < currentTime - scoreTime < 2100:
+                font = pygame.font.Font(None, 74)
+                text = font.render("1", False, WHITE)
+                self.screen.blit(text, (250,250))
+                break
         
-        # pygame.display.flip()
-        # self.clock.tick(60)
         
-        # text = font.render(str("1"), 1, WHITE)
-        # self.screen.blit(text, (250,250))
-            
-        # sleep(1)
-        
-        
-    def startGame(self):  
-        nextLevel=False
+    
+    
+    def startGame(self):                       
         while self.gameOn:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT: # If user clicked close
@@ -137,14 +135,9 @@ class Pong():
                 elif event.type==pygame.KEYDOWN:
                     if event.key==pygame.K_x: #Pressing the x Key will quit the game
                         self.gameOn=False
-            if nextLevel:
-                self.resetGameState()
-                self.addBall(position=[345, randrange(155, 235)])
-                print(self.ballList)
-                # ADD NEXT LEVEL TXT
-                self.level+=1
-                nextLevel = False
-                        
+                
+            if self.playerScore >= 3:
+                self.gameOn = False
             #Moving the paddles when the user uses the arrow keys (player A) or "W/S" keys (player B) 
             keys = pygame.key.get_pressed()
             if keys[pygame.K_w]:
@@ -167,29 +160,29 @@ class Pong():
             #Check if the ball is bouncing against any of the 4 walls:
                 if ball.rect.x>=690:
                     self.playerScore+=1
-                    nextLevel = True
-                    # ball.rect.x=690 
-                    # ball.bounce()
+                    self.resetGameState(pygame.time.get_ticks(), nextLevel=True)
                 if ball.rect.x<=0:
-                    # ball.rect.x=0
                     self.aiScore+=1
-                    self.resetGameState()
-                    # ball.bounce()
-                if ball.rect.y>490:
-                    ball.rect.y=490 
-                    ball.bounce()
-                if ball.rect.y<0:
-                    ball.rect.y=0 
-                    ball.bounce()       
-                if pygame.sprite.collide_mask(ball, self.playerPaddle) or pygame.sprite.collide_mask(ball, self.aiPaddle):
-                    ball.bounce()
+                    self.resetGameState(pygame.time.get_ticks(), nextLevel=False)
+                
+                if ball.rect.y>=490:
+                    ball.rect.y = 490
+                    ball.wallBounce(True)
+                if ball.rect.y<=0:
+                    ball.rect.y = 0
+                    ball.wallBounce(False)
+                          
+                playerCollide = pygame.sprite.collide_mask(ball, self.playerPaddle) 
+                aiCollide = pygame.sprite.collide_mask(ball, self.aiPaddle)
+                if playerCollide or aiCollide:
+                    ball.paddleBounce(playerCollide)
 
                 self.screen.fill(BLACK)
                 
                 pygame.draw.line(self.screen, WHITE, [349, 0], [349, 500], 5)
             
                 self.sprite_list.draw(self.screen)
-            
+              
             font = pygame.font.Font(None, 74)
             text = font.render(str(self.playerScore), 1, WHITE)
             self.screen.blit(text, (250,10))

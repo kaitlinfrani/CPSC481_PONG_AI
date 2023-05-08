@@ -1,5 +1,5 @@
 import pygame
-from random import randint
+from random import randint, randrange
 BLACK = (0,0,0)
  
 class Ball(pygame.sprite.Sprite):
@@ -18,7 +18,7 @@ class Ball(pygame.sprite.Sprite):
         # Draw the ball
         self.rect = pygame.draw.circle(self.image, color,(radius/2,radius/2), radius/2 )
         
-        self.velocity = [randint(4,8),randint(-4,4)]
+        self.velocity = [randint(4,4),randint(-4,4)]
         
         # Fetch the rectangle object that has the dimensions of the image.
     
@@ -28,6 +28,18 @@ class Ball(pygame.sprite.Sprite):
         self.rect.x += self.velocity[0]
         self.rect.y += self.velocity[1]
         
-    def bounce(self):
+    def wallBounce(self, top):
+        if top:
+            self.velocity[1] = randrange(-4,-1)
+        else:
+            self.velocity[1] = randrange(1,4)
+
+
+        print(self.velocity)
+        
+    def paddleBounce(self, playerCollide):
         self.velocity[0] = -self.velocity[0]
-        self.velocity[1] = randint(-4,4)
+        if playerCollide:
+            self.velocity[1] = randint(1,8)
+        else:
+            self.velocity[1] = randint(-8,-1)

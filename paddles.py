@@ -8,6 +8,8 @@ class Paddle(pygame.sprite.Sprite):
         # Call the parent class (Sprite) constructor
         super().__init__()
         
+        self.width = width
+        self.height = height
         # Pass in the color of the paddle, its width and height.
         # Set the background color and set it to be transparent
         self.image = pygame.Surface([width, height])
