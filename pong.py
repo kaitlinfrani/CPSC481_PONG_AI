@@ -107,21 +107,25 @@ class Pong():
     def countdown(self, scoreTime):
         while True:
             currentTime = pygame.time.get_ticks()
+            font = pygame.font.Font("freesansbold.ttf", 60)
             
             if currentTime - scoreTime < 700:
-                font = pygame.font.Font(None, 74)
-                text = font.render("3", False, WHITE)
-                self.screen.blit(text, (250,250))
+                text = font.render("3", True, WHITE)
+                self.screen.blit(text, (335,225))
+                pygame.display.flip()
+                
             
             if 700 < currentTime - scoreTime < 1400:
-                font = pygame.font.Font(None, 74)
-                text = font.render("2", False, WHITE)
-                self.screen.blit(text, (250,250))
+                text = font.render("2", True, WHITE)
+                self.screen.blit(text, (335,225))
+                pygame.display.flip()
+
                 
             if 1400 < currentTime - scoreTime < 2100:
-                font = pygame.font.Font(None, 74)
-                text = font.render("1", False, WHITE)
-                self.screen.blit(text, (250,250))
+                text = font.render("1", True, WHITE)
+                self.screen.blit(text, (335,225))
+                pygame.display.flip()
+
                 break
         
         
