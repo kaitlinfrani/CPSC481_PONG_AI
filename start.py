@@ -1,10 +1,13 @@
 import pygame
 
-from pong import Pong
+from menu import Menu
 
 pygame.init()
 
 screen_size = (700,500)
 
-pongGame = Pong(screen_size)
-pongGame.startGame()
+pongMenu = Menu(screen_size)
+pongMenu.startMenu()
+
+# pongGame = Pong(screen_size)
+# pongGame.startGame()
