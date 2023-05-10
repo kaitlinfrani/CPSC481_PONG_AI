@@ -65,6 +65,21 @@ class Pong():
         
     def setDisplays(self):
         pygame.display.set_caption("PONG")
+    
+    def drawScreen(self):
+        self.screen.fill(BLACK)
+        
+        pygame.draw.line(self.screen, WHITE, [349, 0], [349, 500], 5)
+            
+        self.sprite_list.draw(self.screen)
+        
+        font = pygame.font.Font(None, 74)
+        text = font.render(str(self.playerScore), 1, WHITE)
+        self.screen.blit(text, (250,10))
+        text = font.render(str(self.aiScore), 1, WHITE)
+        self.screen.blit(text, (420,10))
+        
+        pygame.display.flip()
         
     def aiPlayer(self):
         follow = randrange(0,3)
@@ -111,27 +126,33 @@ class Pong():
             
             if currentTime - scoreTime < 700:
                 text = font.render("3", True, WHITE)
-                self.screen.blit(text, (335,225))
-                pygame.display.flip()
-                
             
             if 700 < currentTime - scoreTime < 1400:
                 text = font.render("2", True, WHITE)
-                self.screen.blit(text, (335,225))
-                pygame.display.flip()
-
                 
             if 1400 < currentTime - scoreTime < 2100:
                 text = font.render("1", True, WHITE)
-                self.screen.blit(text, (335,225))
-                pygame.display.flip()
 
+            if currentTime - scoreTime > 2100:
                 break
-        
-        
-    
-    
-    def startGame(self):                       
+            
+            self.screen.fill(BLACK)
+            self.screen.blit(text, (355,225))
+            
+            pygame.draw.line(self.screen, WHITE, [349, 0], [349, 500], 5)
+            
+            self.sprite_list.draw(self.screen)
+              
+            font = pygame.font.Font(None, 74)
+            text = font.render(str(self.playerScore), 1, WHITE)
+            self.screen.blit(text, (250,10))
+            text = font.render(str(self.aiScore), 1, WHITE)
+            self.screen.blit(text, (420,10))
+            
+            pygame.display.flip()
+
+    def startGame(self): 
+        self.countdown(pygame.time.get_ticks())
         while self.gameOn:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT: # If user clicked close
@@ -159,6 +180,7 @@ class Pong():
         
             # --- Game logic should go here
             self.sprite_list.update()
+        
             
             for ball in self.ballList:
             #Check if the ball is bouncing against any of the 4 walls:
@@ -181,19 +203,7 @@ class Pong():
                 if playerCollide or aiCollide:
                     ball.paddleBounce(playerCollide)
 
-                self.screen.fill(BLACK)
-                
-                pygame.draw.line(self.screen, WHITE, [349, 0], [349, 500], 5)
-            
-                self.sprite_list.draw(self.screen)
-              
-            font = pygame.font.Font(None, 74)
-            text = font.render(str(self.playerScore), 1, WHITE)
-            self.screen.blit(text, (250,10))
-            text = font.render(str(self.aiScore), 1, WHITE)
-            self.screen.blit(text, (420,10))
-            
-            pygame.display.flip()
+            self.drawScreen()
             
             self.clock.tick(60)
             
