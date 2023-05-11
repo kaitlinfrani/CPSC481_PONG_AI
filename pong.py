@@ -82,13 +82,14 @@ class Pong():
         pygame.display.flip()
         
     def aiPlayer(self):
-        follow = randrange(0,3)
+        follow = randrange(0,2)
         
         if 0 <= self.aiPaddle.rect.y <= 400:
             if follow == 0:
                 closest = self.ballList[0]
+                print(self.ballList)
                 for ball in self.ballList:
-                    if self.aiPaddle.rect.y - ball.rect.y <= 0:
+                    if self.aiPaddle.rect.x - ball.rect.x <= closest.rect.x:
                         closest = ball
                 if self.aiPaddle.rect.y < closest.rect.y:
                     self.aiPaddle.rect.y += 5
