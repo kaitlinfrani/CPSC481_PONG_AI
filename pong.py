@@ -137,7 +137,7 @@ class Pong():
                 break
             
             self.screen.fill(BLACK)
-            self.screen.blit(text, (355,225))
+            self.screen.blit(text, (355,255))
             
             pygame.draw.line(self.screen, WHITE, [349, 0], [349, 500], 5)
             
