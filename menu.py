@@ -11,7 +11,7 @@ class Menu:
         self.screen_height = screen_height
         
     def startMenu(self):
-        menu = pygame_menu.Menu('Welcome', 400, 300,
+        menu = pygame_menu.Menu('PONG', 400, 300,
                             theme=pygame_menu.themes.THEME_BLUE)
 
         # menu.add.text_input('Name :', default='John Doe')

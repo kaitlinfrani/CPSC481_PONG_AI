@@ -2,7 +2,6 @@ import pygame
 
 from paddles import Paddle
 from ball import Ball
-from time import sleep
 from random import randrange
 
 BLACK = (0,0,0)
@@ -19,8 +18,8 @@ class Pong():
         self.numBalls = 1
         
         # Paddle Variables
-        self.playerPaddle = Paddle(WHITE, 0, 0)
-        self.aiPaddle = Paddle(WHITE, 0, 0)
+        self.playerPaddle = Paddle(WHITE, 0, 0, self.screen_height)
+        self.aiPaddle = Paddle(WHITE, 0, 0, self.screen_height)
         
         # Sprite list containing Balls, Paddle, and other sprites
         self.sprite_list = pygame.sprite.Group()
@@ -39,18 +38,19 @@ class Pong():
 
     def createPaddles(self, player_color=WHITE, ai_color=WHITE, x_size=10, y_size=100):
         ''' Creates the player and ai paddles'''
-        self.playerPaddle = Paddle(player_color, x_size, y_size)
+        self.playerPaddle = Paddle(player_color, x_size, y_size, self.screen_height)
         self.playerPaddle.rect.x = self.screen_width - 1160
         self.playerPaddle.rect.y = self.screen_height / 2
 
-        self.aiPaddle = Paddle(ai_color, x_size, y_size)
+        self.aiPaddle = Paddle(ai_color, x_size, y_size, self.screen_height)
         self.aiPaddle.rect.x = self.screen_width - 40
         self.aiPaddle.rect.y = self.screen_height / 2
         
     def addBall(self, position, ball_color=WHITE, radius = 10):    
-        ball = Ball(ball_color, radius)
+        ball = Ball(ball_color, radius, self.level-1)
         ball.rect.x = position[0]
         ball.rect.y = position[1]
+        ball.setReleaseTime(pygame.time.get_ticks() + (600 * (self.level - 1)))
         self.ballList.append(ball)
         
     def initializeGame(self):
@@ -86,21 +86,25 @@ class Pong():
     def aiPlayer(self):
         follow = randrange(0,2)
         
-        if 0 <= self.aiPaddle.rect.y <= self.screen_height:
+        if 0 <= self.aiPaddle.rect.y <= self.screen_height - self.aiPaddle.height:
             if follow == 0:
                 closest = self.ballList[0]
-                print(self.ballList)
                 for ball in self.ballList:
-                    if self.aiPaddle.rect.x - ball.rect.x <= closest.rect.x:
-                        closest = ball
+                    if ball.getOutOfBounds() is False:
+                        print("ball", ball, ball.getId(), ball.rect.x, ball.getOutOfBounds())
+                        if closest.getOutOfBounds() is True:
+                            closest = ball
+                        if self.aiPaddle.rect.x - ball.rect.x <= self.aiPaddle.rect.x - closest.rect.x:
+                            closest = ball
+                    print("closest",closest, closest.getId(), closest.rect.x, closest.getOutOfBounds())
                 if self.aiPaddle.rect.y < closest.rect.y:
-                    self.aiPaddle.rect.y += 5
-                else:
-                    self.aiPaddle.rect.y -= 5
+                    self.aiPaddle.rect.y += 5 + self.level
+                elif self.aiPaddle.rect.y > closest.rect.y:
+                    self.aiPaddle.rect.y -= 5 + self.level
         elif self.aiPaddle.rect.y < 0 :
             self.aiPaddle.rect.y = 0
-        elif self.aiPaddle.rect.y > self.screen_height:
-            self.aiPaddle.rect.y = self.screen_height
+        elif self.aiPaddle.rect.y > self.screen_height - self.aiPaddle.height:
+            self.aiPaddle.rect.y = self.screen_height - self.aiPaddle.height
         
     def resetGameState(self, scoreTime, nextLevel):
         self.playerPaddle.rect.x = self.screen_width - 1160
@@ -110,15 +114,19 @@ class Pong():
         self.aiPaddle.rect.y = self.screen_height / 2
         
         if nextLevel:
-            self.addBall(position=[self.screen_width / 2, 550])
+            self.level+=1
+            if self.ballList.count(Ball) < 3:
+                self.addBall(position=[self.screen_width / 2, 550])            
         
-        for ball in self.ballList:
+        for idx, ball in enumerate(self.ballList):
             ball.rect.x = self.screen_width / 2
-            ball.rect.y = randrange(300, 900)
+            ball.rect.y = randrange(300, 600)
+            ball.setReleaseTime(pygame.time.get_ticks() + (3000 * idx))
+            ball.setReleased(False)
+            ball.setOutOfBounds(False)
             
-        for _ in self.ballList:
-            self.sprite_list.add(_)
-        
+        self.sprite_list.add(self.ballList[-1])
+
         self.countdown(scoreTime)
         
         
@@ -154,9 +162,31 @@ class Pong():
 
             pygame.display.flip()
 
-    def startGame(self): 
-        if self.level < 3:
-            self.countdown(pygame.time.get_ticks())
+    def checkOutOfBounds(self, ball):
+        if 0 >= ball.rect.x or ball.rect.x >= self.screen_width:
+            return True
+        return False
+    
+    def checkNumPlayBalls(self):
+        ballCount = 0
+        for _ in self.sprite_list:
+            if isinstance(_, Ball) and not self.checkOutOfBounds(_):
+                ballCount += 1
+        return ballCount
+    
+    def checkScores(self):
+        if self.playerScore > self.aiScore:
+            self.resetGameState(pygame.time.get_ticks(), nextLevel=True)
+        else:
+            self.resetGameState(pygame.time.get_ticks(), nextLevel=False)
+     
+    def restartPrompt(self):
+        pass    
+    
+    
+    def startGame(self):
+        self.countdown(pygame.time.get_ticks())
+        
         while self.gameOn:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT: # If user clicked close
@@ -164,9 +194,7 @@ class Pong():
                 elif event.type==pygame.KEYDOWN:
                     if event.key==pygame.K_x: #Pressing the x Key will quit the game
                         self.gameOn=False
-                
-            if self.playerScore >= 3:
-                self.gameOn = False
+
             #Moving the paddles when the user uses the arrow keys (player A) or "W/S" keys (player B) 
             keys = pygame.key.get_pressed()
             if keys[pygame.K_w]:
@@ -185,28 +213,53 @@ class Pong():
             # --- Game logic should go here
             self.sprite_list.update()
         
+            for ball in self.ballList:      
+                if pygame.time.get_ticks() >= ball.getReleaseTime() and ball.getReleased() is False:
+                    ball.setVelocity()
+                    ball.setReleased(True)
             
             for ball in self.ballList:
-            #Check if the ball is bouncing against any of the 4 walls:             
-                if ball.rect.x>=self.screen_width:
-                    self.playerScore+=1
-                    self.resetGameState(pygame.time.get_ticks(), nextLevel=True)
-                if ball.rect.x<=0:
-                    self.aiScore+=1
-                    self.resetGameState(pygame.time.get_ticks(), nextLevel=False)
                 
+            #Check if the ball is bouncing against any of the 4 walls:
+                if ball.rect.x>=self.screen_width and ball.getOutOfBounds() is False:
+                    ball.setVelocityZero()
+                    ball.setOutOfBounds(True)
+                    self.playerScore+=1
+
+                if ball.rect.x<=0 and ball.getOutOfBounds() is False:
+                    ball.setVelocityZero()
+                    ball.setOutOfBounds(True)
+                    self.aiScore+=1
+                                             
                 if ball.rect.y>=self.screen_height:
                     ball.rect.y = self.screen_height
                     ball.wallBounce(True)
                 if ball.rect.y<=0:
                     ball.rect.y = 0
                     ball.wallBounce(False)
-                          
+                
                 playerCollide = pygame.sprite.collide_mask(ball, self.playerPaddle) 
                 aiCollide = pygame.sprite.collide_mask(ball, self.aiPaddle)
                 if playerCollide or aiCollide:
                     ball.paddleBounce(playerCollide)
+                    
+            if self.checkNumPlayBalls() <= 0:
+                self.checkScores()   
 
+            if self.playerScore >= 6:
+                font = pygame.font.Font("freesansbold.ttf", 60)
+                text = font.render("Player Wins!", True, WHITE)
+                self.screen.fill(BLACK)
+                self.screen.blit(text, (self.screen_width / 2, self.screen_height / 2))
+                    
+                self.gameOn = False
+            elif self.aiScore >= 6:
+                font = pygame.font.Font("freesansbold.ttf", 60)
+                text = font.render("AI Wins!", True, WHITE)
+                self.screen.fill(BLACK)
+                self.screen.blit(text, (self.screen_width / 2, self.screen_height / 2))
+                
+                self.gameOn = False
             self.drawScreen()
             
             self.clock.tick(60)
