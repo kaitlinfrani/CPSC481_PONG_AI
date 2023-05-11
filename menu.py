@@ -16,10 +16,11 @@ class Menu:
 
         # menu.add.text_input('Name :', default='John Doe')
         # menu.add.selector('Difficulty :', [('Hard', 1), ('Easy', 2)], onchange=set_difficulty)
-        menu.add.button('Play', self.start_game)
+        menu.add.button('Play', pong.startGame)
         menu.add.button('Quit', pygame_menu.events.EXIT)
-        
+            
         menu.mainloop(self.screen)
+
 
     
     def set_difficulty(value, difficulty):
