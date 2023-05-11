@@ -9,8 +9,10 @@ BLACK = (0,0,0)
 WHITE = (255,255,255)
 
 class Pong():
-    def __init__(self, screen_size, twoPlayer=False):
+    def __init__(self, screen_size, screen_width, screen_height, twoPlayer=False):
         self.screen = pygame.display.set_mode(screen_size)
+        self.screen_width = screen_width
+        self.screen_height = screen_height
         
         # Ball Variables
         self.ballList = []
@@ -38,12 +40,12 @@ class Pong():
     def createPaddles(self, player_color=WHITE, ai_color=WHITE, x_size=10, y_size=100):
         ''' Creates the player and ai paddles'''
         self.playerPaddle = Paddle(player_color, x_size, y_size)
-        self.playerPaddle.rect.x = 20
-        self.playerPaddle.rect.y = 200
+        self.playerPaddle.rect.x = self.screen_width - 1160
+        self.playerPaddle.rect.y = self.screen_height / 2
 
         self.aiPaddle = Paddle(ai_color, x_size, y_size)
-        self.aiPaddle.rect.x = 670
-        self.aiPaddle.rect.y = 200
+        self.aiPaddle.rect.x = self.screen_width - 40
+        self.aiPaddle.rect.y = self.screen_height / 2
         
     def addBall(self, position, ball_color=WHITE, radius = 10):    
         ball = Ball(ball_color, radius)
@@ -55,7 +57,7 @@ class Pong():
         self.setDisplays()
                 
         self.createPaddles()
-        self.addBall(position=[345, 195])
+        self.addBall(position=[self.screen_width / 2, self.screen_height / 2])
         
         self.sprite_list.add(self.playerPaddle)
         self.sprite_list.add(self.aiPaddle)
@@ -69,22 +71,22 @@ class Pong():
     def drawScreen(self):
         self.screen.fill(BLACK)
         
-        pygame.draw.line(self.screen, WHITE, [349, 0], [349, 500], 5)
+        pygame.draw.line(self.screen, WHITE, [self.screen_width / 2, 0], [self.screen_width / 2, self.screen_height], 5)
             
         self.sprite_list.draw(self.screen)
         
         font = pygame.font.Font(None, 74)
         text = font.render(str(self.playerScore), 1, WHITE)
-        self.screen.blit(text, (250,10))
+        self.screen.blit(text, (self.screen_width / 4, 10))
         text = font.render(str(self.aiScore), 1, WHITE)
-        self.screen.blit(text, (420,10))
+        self.screen.blit(text, (self.screen_width - (self.screen_width / 4),10))
         
         pygame.display.flip()
         
     def aiPlayer(self):
         follow = randrange(0,2)
         
-        if 0 <= self.aiPaddle.rect.y <= 400:
+        if 0 <= self.aiPaddle.rect.y <= self.screen_height:
             if follow == 0:
                 closest = self.ballList[0]
                 print(self.ballList)
@@ -97,22 +99,22 @@ class Pong():
                     self.aiPaddle.rect.y -= 5
         elif self.aiPaddle.rect.y < 0 :
             self.aiPaddle.rect.y = 0
-        elif self.aiPaddle.rect.y > 400:
-            self.aiPaddle.rect.y = 400
+        elif self.aiPaddle.rect.y > self.screen_height:
+            self.aiPaddle.rect.y = self.screen_height
         
     def resetGameState(self, scoreTime, nextLevel):
-        self.playerPaddle.rect.x = 20
-        self.playerPaddle.rect.y = 200
+        self.playerPaddle.rect.x = self.screen_width - 1160
+        self.playerPaddle.rect.y = self.screen_height / 2
         
-        self.aiPaddle.rect.x = 670
-        self.aiPaddle.rect.y = 200
+        self.aiPaddle.rect.x = self.screen_width - 40
+        self.aiPaddle.rect.y = self.screen_height / 2
         
         if nextLevel:
-            self.addBall(position=[345, 195])
+            self.addBall(position=[self.screen_width / 2, 550])
         
         for ball in self.ballList:
-            ball.rect.x = 345
-            ball.rect.y = randrange(155, 235)
+            ball.rect.x = self.screen_width / 2
+            ball.rect.y = randrange(300, 900)
             
         for _ in self.ballList:
             self.sprite_list.add(_)
@@ -138,22 +140,23 @@ class Pong():
                 break
             
             self.screen.fill(BLACK)
-            self.screen.blit(text, (355,255))
+            self.screen.blit(text, (self.screen_width / 2, self.screen_height / 2))
             
-            pygame.draw.line(self.screen, WHITE, [349, 0], [349, 500], 5)
+            pygame.draw.line(self.screen, WHITE, [self.screen_width / 2, 0], [self.screen_width / 2, self.screen_height], 5)
             
             self.sprite_list.draw(self.screen)
               
             font = pygame.font.Font(None, 74)
             text = font.render(str(self.playerScore), 1, WHITE)
-            self.screen.blit(text, (250,10))
+            self.screen.blit(text, (self.screen_width / 4, 10))
             text = font.render(str(self.aiScore), 1, WHITE)
-            self.screen.blit(text, (420,10))
-            
+            self.screen.blit(text, (self.screen_width - (self.screen_width / 4),10))
+
             pygame.display.flip()
 
     def startGame(self): 
-        self.countdown(pygame.time.get_ticks())
+        if self.level < 3:
+            self.countdown(pygame.time.get_ticks())
         while self.gameOn:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT: # If user clicked close
@@ -184,16 +187,16 @@ class Pong():
         
             
             for ball in self.ballList:
-            #Check if the ball is bouncing against any of the 4 walls:
-                if ball.rect.x>=690:
+            #Check if the ball is bouncing against any of the 4 walls:             
+                if ball.rect.x>=self.screen_width:
                     self.playerScore+=1
                     self.resetGameState(pygame.time.get_ticks(), nextLevel=True)
                 if ball.rect.x<=0:
                     self.aiScore+=1
                     self.resetGameState(pygame.time.get_ticks(), nextLevel=False)
                 
-                if ball.rect.y>=490:
-                    ball.rect.y = 490
+                if ball.rect.y>=self.screen_height:
+                    ball.rect.y = self.screen_height
                     ball.wallBounce(True)
                 if ball.rect.y<=0:
                     ball.rect.y = 0
