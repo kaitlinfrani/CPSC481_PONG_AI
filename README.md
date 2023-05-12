@@ -26,5 +26,7 @@ Start.py File
 
 ## How to Play
 Have python, pygame, and pygame-menu installed.
+
 Clone the repository and open up your terminal.
+
 In your terminal, type: "py ./start.py" to run the game.
