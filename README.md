@@ -1,5 +1,5 @@
 # CPSC481_Project-- PONG AI
-# Created By: Julian Ogata, Kaitlin Frani, Kelly Vu
+Created By: Julian Ogata, Kaitlin Frani, Kelly Vu
 
 ## Details of Files
 There are 5 files:
