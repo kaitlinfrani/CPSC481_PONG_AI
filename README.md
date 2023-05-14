@@ -9,23 +9,30 @@ There are 5 files:
 - pong.py
 - start.py
 
-Ball.py File
+## Ball.py File
 - This file controls the movement of the ball(s), and the additional balls that appear in the game
 
-Menu.py File
+## Menu.py File
 - This file is the menu page before beginning the game. It will have a play button and quit button.
 
-Paddles.py File
-- This file controls the movement of the paddles to hit the balls.
+## Paddles.py File
+- This file controls the movement of the paddles on the y-axis of each end of the respective player/ai courts.
 
-Pong.py File
-- This is the file that allows the whole game to function. This controls how the player scores, wins, and loses.
+## Pong.py File
+- This is the file that allows the whole game to function. This controls how the player scores, wins, and loses. Contains the rules and the AI function
 
-Start.py File
+## Start.py File
 - This is the file that runs the game once the command "py ./start/py" is entered.
 
 ## How to Play
 Have python, pygame, and pygame-menu installed.
+You may use requirements.txt to install
+
+WINDOWS
+py -m pip install -r requirements.txt
+
+LINUX
+pip install -r requirements.txt
 
 Clone the repository and open up your terminal.
 
